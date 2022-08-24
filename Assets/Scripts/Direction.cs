@@ -13,7 +13,7 @@ public enum Direction {
 }
 
 
-public class DirectionUtils {
+public abstract class DirectionUtils {
     public static Vector2Int NeighbourPos(Cell src, Direction direction) {
         var diff = src.pos.y % 2 == 0
             ? _evenColNeighbourPosForDirection[direction]

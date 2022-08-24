@@ -9,7 +9,7 @@ public class Main : MonoBehaviour {
     public Tile blankTile;
     public GameObject iconPlaceholder;
 
-    private Tilemap _map;
+    public Tilemap _map { get; private set; }
     private Sprite[] _icons;
 
     void Awake() {
@@ -21,14 +21,15 @@ public class Main : MonoBehaviour {
         GeneratePuzzle();
     }
 
+    public Cell _cell;
+
     void Update() {
+        var mousePosWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
         if (Input.GetMouseButtonDown(0)) {
-            var mousePosWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            mousePosWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             var mouseCell = _map.WorldToCell(mousePosWorld);
             var mouseCellInterpolated = _map.LocalToCellInterpolated(mousePosWorld);
-
-            Debug.Log(_map.WorldToCell(mousePosWorld));
         }
     }
 
@@ -41,6 +42,7 @@ public class Main : MonoBehaviour {
             CreateRandomCell(Vector2Int.zero)
         };
         List<Cell> outerLayer = new() { cells.First() };
+        _cell = cells.First();
         for (int layer = 1; layer < n; ++layer) {
             List<Cell> nextOuterLayer = new();
             // create next outer layer from the previous one
@@ -60,7 +62,7 @@ public class Main : MonoBehaviour {
                             neighbourToNewCellPos,
                             out Cell neighbourToNewCell);
                         if (isAdjecent) {
-                            Debug.Log(newCell.pos + " + " + directionFromNewCell + "  = " + neighbourToNewCell.pos);
+                            // Debug.Log(newCell.pos + " + " + directionFromNewCell + "  = " + neighbourToNewCell.pos);
                             var matchingEdge = DirectionUtils.OppositeDirection(directionFromNewCell);
                             newCell.icons[directionFromNewCell] = neighbourToNewCell.icons[matchingEdge];
                         }
@@ -81,12 +83,35 @@ public class Main : MonoBehaviour {
 
     void RenderCell(Cell cell) {
         _map.SetTile((Vector3Int)cell.pos, blankTile);
+        RenderIconForMap(cell);
+    }
+
+    void RenderIconForMap(Cell cell) {
+        RenderIcons(cell, _map.transform, RenderIconsFor.Map);
+    }
+
+    public void RenderIconsForTarget(Cell cell, GameObject target) {
+        RenderIcons(cell, target.transform, RenderIconsFor.Target);
+    }
+
+    private enum RenderIconsFor {
+        Map,
+        Target,
+    }
+
+    void RenderIcons(Cell cell, Transform parent, RenderIconsFor purpose) {
         foreach (var direction in AllDirections()) {
             var icon = cell.icons[direction];
             var iconPos = DirectionUtils.CellEdgeIconToWorld(_map, cell, direction);
-            var iconObject = GameObject.Instantiate(iconPlaceholder, iconPos, Quaternion.identity);
-
-            iconObject.GetComponent<SpriteRenderer>().sprite = icon;
+            var iconObject = Instantiate(
+                iconPlaceholder, iconPos, Quaternion.identity, parent);
+            var iconSpriteRenderer = iconObject.GetComponent<SpriteRenderer>();
+            iconSpriteRenderer.sprite = icon;
+            // make sorting layer for icons higher than parent
+            iconSpriteRenderer.sortingLayerName = "Icons";
+            if (purpose == RenderIconsFor.Target) {
+                iconObject.transform.localPosition = iconObject.transform.position;
+            }
         }
     }
 
