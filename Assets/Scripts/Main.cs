@@ -81,7 +81,7 @@ public class Main : MonoBehaviour {
         }
     }
 
-    void RenderCell(Cell cell) {
+    public void RenderCell(Cell cell) {
         _map.SetTile((Vector3Int)cell.pos, blankTile);
         RenderIconForMap(cell);
     }
