@@ -90,7 +90,11 @@ public class Main : MonoBehaviour {
     }
 
     public void DestroyCellAt(Vector2Int pos) {
-        GetTileAt(pos).DeleteAllIcons();
+        var tile = GetTileAt(pos);
+        if (tile == null) {
+            return;
+        }
+        tile.DeleteAllIcons();
         _map.SetTile((Vector3Int)pos, noTileStub);
     }
 
@@ -111,6 +115,10 @@ public class Main : MonoBehaviour {
     }
 
     bool IsLegalPlacement(Cell cell) {
+        if (_map.GetTile<HexTile>((Vector3Int)cell.pos) != null) {
+            // can't place if there is a tile there already
+            return false;
+        }
         return !AllDirections().Any(d => !DoIconsMatch(cell, d));
     }
 
