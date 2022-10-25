@@ -7,12 +7,20 @@ using System.Linq;
 
 public class Main : MonoBehaviour {
     public Tile blankTile;
+    public Tile noTileStub;
     public GameObject iconPlaceholder;
 
     public Tilemap _map { get; private set; }
     private Sprite[] _icons;
 
+    private static Main _instance = null;
+
+    public static Main GetInstance() {
+        return _instance;
+    }
+
     void Awake() {
+        _instance = this;
         _map = GetComponent<Tilemap>();
         _icons = Resources.LoadAll<Sprite>("Sprites/Icons");
     }
@@ -81,8 +89,43 @@ public class Main : MonoBehaviour {
         }
     }
 
+    public void DestroyCellAt(Vector2Int pos) {
+        GetTileAt(pos).DeleteAllIcons();
+        _map.SetTile((Vector3Int)pos, noTileStub);
+    }
+
+    public bool TryPlaceCell(Cell cell) {
+        if (!IsLegalPlacement(cell)) {
+            return false;
+        }
+        RenderCell(cell);
+        return true;
+    }
+
+    HexTile GetTileAt(Vector2Int pos) {
+        return GetTileAtVector3((Vector3Int)pos);
+    }
+
+    HexTile GetTileAtVector3(Vector3Int pos) {
+        return _map.GetTile<HexTile>(pos);
+    }
+
+    bool IsLegalPlacement(Cell cell) {
+        return !AllDirections().Any(d => !DoIconsMatch(cell, d));
+    }
+
+    bool DoIconsMatch(Cell cell, Direction direction) {
+        var neighbourPos = DirectionUtils.NeighbourPos(cell, direction);
+        var neighbour = _map.GetTile<HexTile>((Vector3Int)neighbourPos);
+        if (neighbour == null) {
+            return true;
+        }
+        var opposite = DirectionUtils.OppositeDirection(direction);
+        return cell.icons[direction] == neighbour.cell.icons[opposite];
+    }
+
     public void RenderCell(Cell cell) {
-        _map.SetTile((Vector3Int)cell.pos, blankTile);
+        _map.SetTile((Vector3Int)cell.pos, HexTile.CreateFromCell(cell));
         RenderIconForMap(cell);
     }
 
@@ -100,6 +143,7 @@ public class Main : MonoBehaviour {
     }
 
     void RenderIcons(Cell cell, Transform parent, RenderIconsFor purpose) {
+        HexTile tile = GetTileAt(cell.pos);
         foreach (var direction in AllDirections()) {
             var icon = cell.icons[direction];
             var iconPos = DirectionUtils.CellEdgeIconToWorld(_map, cell, direction);
@@ -111,6 +155,10 @@ public class Main : MonoBehaviour {
             iconSpriteRenderer.sortingLayerName = "Icons";
             if (purpose == RenderIconsFor.Target) {
                 iconObject.transform.localPosition = iconObject.transform.position;
+            }
+            if (purpose == RenderIconsFor.Map) {
+                // remember icons to remove on hex deletion
+                tile.iconObjects.Add(iconObject);
             }
         }
     }

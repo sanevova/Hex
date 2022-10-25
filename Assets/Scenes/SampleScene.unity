@@ -2101,6 +2101,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   blankTile: {fileID: 11400000, guid: 2a5a06510ea7ad14f8934e5ac7c3aed1, type: 2}
+  noTileStub: {fileID: 11400000, guid: 04f7efd85e3105b40bcda13545d1f3f9, type: 2}
   iconPlaceholder: {fileID: 3295826238401510602, guid: 384a20ac148e1694fb76ff25971e0d02, type: 3}
 --- !u!1 &2027937219
 GameObject:

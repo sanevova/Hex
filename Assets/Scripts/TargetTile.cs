@@ -25,10 +25,17 @@ public class TargetTile : MonoBehaviour {
                     pos = (Vector2Int)mouseCell,
                     icons = cell.icons,
                 };
-                main.RenderCell(droppedToCell);
+                main.TryPlaceCell(droppedToCell);
                 // start dragging again
                 shouldDragAndDrop = true;
             }
+        }
+
+        if (Input.GetMouseButtonDown(1)) {
+            var map = main._map;
+            var mousePosWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            var mouseCell = map.WorldToCell(mousePosWorld);
+            main.DestroyCellAt((Vector2Int)mouseCell);
         }
 
         if (shouldDragAndDrop) {
