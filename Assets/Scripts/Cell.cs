@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-public struct Cell {
+public class Cell {
     public Vector2Int pos;
     public Dictionary<Direction, Sprite> icons;
 
@@ -21,4 +21,22 @@ public struct Cell {
         }
     }
 
+    public void RotateIconsClockwize() {
+        RotateIcons(true);
+    }
+
+    public void RotateIconsCounterClockwize() {
+        RotateIcons(false);
+    }
+
+    private void RotateIcons(bool isClockwize) {
+        var newIcons = new Dictionary<Direction, Sprite>(icons);
+        foreach (var direction in icons.Keys) {
+            var newDirection = isClockwize
+                ? DirectionUtils.NextClockwizeDirection(direction)
+                : DirectionUtils.NextCounterClockwizeDirection(direction);
+            newIcons[newDirection] = icons[direction];
+        }
+        icons = newIcons;
+    }
 }

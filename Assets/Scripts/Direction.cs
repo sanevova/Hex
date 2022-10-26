@@ -35,6 +35,22 @@ public abstract class DirectionUtils {
         }
         return _allDirections;
     }
+
+    public static Direction NextClockwizeDirection(Direction direction) {
+        return NextDirection(direction, true);
+    }
+
+    public static Direction NextCounterClockwizeDirection(Direction direction) {
+        return NextDirection(direction, false);
+    }
+
+    private static Direction NextDirection(Direction direction, bool isClockwize) {
+        var offset = isClockwize ? 1 : -1;
+        var currentIndex = System.Array.IndexOf(_clockwizeDirections, direction);
+        var nextIndex = (currentIndex + offset + _clockwizeDirections.Length) % _clockwizeDirections.Length;
+        return _clockwizeDirections[nextIndex];
+    }
+
     private static Dictionary<Direction, Vector2Int> _evenColNeighbourPosForDirection = new() {
         // clockwise
         {Direction.TOP_RIGHT, Vector2Int.up},
@@ -76,4 +92,9 @@ public abstract class DirectionUtils {
 
     private static Direction[] _allDirections = { };
 
+    private static Direction[] _clockwizeDirections = {
+        // clockwize
+        Direction.TOP_RIGHT, Direction.RIGHT, Direction.BOTTOM_RIGHT,
+        Direction.BOTTOM_LEFT, Direction.LEFT, Direction.TOP_LEFT,
+    };
 }
