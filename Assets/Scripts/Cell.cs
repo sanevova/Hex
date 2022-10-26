@@ -39,4 +39,18 @@ public class Cell {
         }
         icons = newIcons;
     }
+
+    public static Cell CreateRandomCell() {
+        return CreateRandomCell(Vector2Int.zero);
+    }
+
+    public static Cell CreateRandomCell(Vector2Int pos) {
+        Cell cell = pos;
+        var possibleIcons = Main.GetInstance().possibleIcons;
+        foreach (Direction direction in DirectionUtils.AllDirections()) {
+            var randomIconIndex = UnityEngine.Random.Range(0, possibleIcons.Length);
+            cell.icons[direction] = possibleIcons[randomIconIndex];
+        }
+        return cell;
+    }
 }

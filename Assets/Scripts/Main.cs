@@ -11,7 +11,7 @@ public class Main : MonoBehaviour {
     public GameObject iconPlaceholder;
 
     public Tilemap _map { get; private set; }
-    private Sprite[] _icons;
+    public Sprite[] possibleIcons;
 
     private static Main _instance = null;
 
@@ -22,7 +22,7 @@ public class Main : MonoBehaviour {
     void Awake() {
         _instance = this;
         _map = GetComponent<Tilemap>();
-        _icons = Resources.LoadAll<Sprite>("Sprites/Icons");
+        possibleIcons = Resources.LoadAll<Sprite>("Sprites/Icons");
     }
 
     void Start() {
@@ -47,7 +47,7 @@ public class Main : MonoBehaviour {
 
     void GeneratePuzzleForNumberOfLayers(int n) {
         HashSet<Cell> cells = new(new Cell.CellEqualityComparer()) {
-            CreateRandomCell(Vector2Int.zero)
+            Cell.CreateRandomCell(Vector2Int.zero)
         };
         List<Cell> outerLayer = new() { cells.First() };
         _cell = cells.First();
@@ -62,7 +62,7 @@ public class Main : MonoBehaviour {
                         // skip if cell at this pos was already created before
                         continue;
                     }
-                    var newCell = CreateRandomCell(newPos);
+                    var newCell = Cell.CreateRandomCell(newPos);
                     // match icons with icons of existing neighbour cells
                     foreach (var directionFromNewCell in AllDirections()) {
                         var neighbourToNewCellPos = DirectionUtils.NeighbourPos(newCell, directionFromNewCell);
@@ -98,11 +98,12 @@ public class Main : MonoBehaviour {
         _map.SetTile((Vector3Int)pos, noTileStub);
     }
 
-    public bool TryPlaceCell(Cell cell) {
+    public bool TryPlaceCell(Cell cell, TargetTile tile) {
         if (!IsLegalPlacement(cell)) {
             return false;
         }
         RenderCell(cell);
+        tile.ProceedToNextTargetTile();
         return true;
     }
 
@@ -169,15 +170,6 @@ public class Main : MonoBehaviour {
                 tile.iconObjects.Add(iconObject);
             }
         }
-    }
-
-    Cell CreateRandomCell(Vector2Int pos) {
-        Cell cell = pos;
-        foreach (Direction direction in AllDirections()) {
-            var randomIconIndex = UnityEngine.Random.Range(0, _icons.Length);
-            cell.icons[direction] = _icons[randomIconIndex];
-        }
-        return cell;
     }
 
     Direction[] AllDirections() {
