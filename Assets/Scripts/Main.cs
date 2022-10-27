@@ -161,13 +161,14 @@ public class Main : MonoBehaviour {
             var iconSpriteRenderer = iconObject.GetComponent<SpriteRenderer>();
             iconSpriteRenderer.sprite = icon;
             // make sorting layer for icons higher than parent
-            iconSpriteRenderer.sortingLayerName = "Icons";
             if (purpose == RenderIconsFor.Target) {
                 iconObject.transform.localPosition = iconObject.transform.position;
+                iconSpriteRenderer.sortingLayerName = "TargetTileIcons";
             }
             if (purpose == RenderIconsFor.Map) {
                 // remember icons to remove on hex deletion
                 tile.iconObjects.Add(iconObject);
+                iconSpriteRenderer.sortingLayerName = "Icons";
             }
         }
     }

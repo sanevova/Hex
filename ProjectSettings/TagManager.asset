@@ -44,9 +44,12 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Icons
+    uniqueID: 1318029983
+    locked: 0
   - name: TargetTile
     uniqueID: 1864661653
     locked: 0
-  - name: Icons
-    uniqueID: 1318029983
+  - name: TargetTileIcons
+    uniqueID: 1385283865
     locked: 0
