@@ -10,7 +10,6 @@ public class TargetTile : MonoBehaviour {
     private bool didRenderIcons = false;
     private bool shouldDragAndDrop = true;
     private Animator animator;
-    private const float ONE_TURN_ANGLE = 60f; // 60 degrees is 1/6 of full rotation
 
     void Start() {
         animator = GetComponent<Animator>();
@@ -69,7 +68,10 @@ public class TargetTile : MonoBehaviour {
 
     void TurnParentClockwizeOrCounterClockwize(bool isClockwize) {
         transform.parent.Rotate(
-            new Vector3(0, 0, isClockwize ? -ONE_TURN_ANGLE : ONE_TURN_ANGLE)
+            new Vector3(0, 0, isClockwize
+                ? -DirectionUtils.ONE_TURN_ANGLE
+                : DirectionUtils.ONE_TURN_ANGLE
+            )
         );
     }
 

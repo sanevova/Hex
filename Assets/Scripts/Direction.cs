@@ -14,6 +14,8 @@ public enum Direction {
 
 
 public abstract class DirectionUtils {
+    public const float ONE_TURN_ANGLE = 60f; // 60 degrees is 1/6 of full rotation
+
     public static Vector2Int NeighbourPos(Cell src, Direction direction) {
         var diff = src.pos.y % 2 == 0
             ? _evenColNeighbourPosForDirection[direction]
@@ -42,6 +44,19 @@ public abstract class DirectionUtils {
 
     public static Direction NextCounterClockwizeDirection(Direction direction) {
         return NextDirection(direction, false);
+    }
+
+    public static Dictionary<Direction, float> DirectionAngles() {
+        if (_directionAngles.Count == 0) {
+            var nextDirection = Direction.RIGHT;
+            var nextAngle = 90f;
+            while (!_directionAngles.ContainsKey(nextDirection)) {
+                _directionAngles[nextDirection] = nextAngle;
+                nextDirection = NextClockwizeDirection(nextDirection);
+                nextAngle -= ONE_TURN_ANGLE;
+            }
+        }
+        return _directionAngles;
     }
 
     private static Direction NextDirection(Direction direction, bool isClockwize) {
@@ -97,4 +112,6 @@ public abstract class DirectionUtils {
         Direction.TOP_RIGHT, Direction.RIGHT, Direction.BOTTOM_RIGHT,
         Direction.BOTTOM_LEFT, Direction.LEFT, Direction.TOP_LEFT,
     };
+
+    private static Dictionary<Direction, float> _directionAngles = new();
 }

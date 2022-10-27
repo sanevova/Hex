@@ -153,11 +153,14 @@ public class Main : MonoBehaviour {
 
     void RenderIcons(Cell cell, Transform parent, RenderIconsFor purpose) {
         HexTile tile = GetTileAt(cell.pos);
+        var directionAngles = DirectionUtils.DirectionAngles();
         foreach (var direction in AllDirections()) {
             var icon = cell.icons[direction];
             var iconPos = DirectionUtils.CellEdgeIconToWorld(_map, cell, direction);
             var iconObject = Instantiate(
                 iconPlaceholder, iconPos, Quaternion.identity, parent);
+            iconObject.transform.Rotate(new Vector3(0, 0, directionAngles[direction]));
+            // iconObject.transform.rotation = Quaternion.Euler(NewdirectionAngles[direction]);
             var iconSpriteRenderer = iconObject.GetComponent<SpriteRenderer>();
             iconSpriteRenderer.sprite = icon;
             // make sorting layer for icons higher than parent
