@@ -41,6 +41,10 @@ public class TargetTile : MonoBehaviour {
     }
 
     void ProcessTurnInput() {
+        if (Input.GetKey(KeyCode.LeftControl)) {
+            // zooming camera
+            return;
+        }
         // turning tile on mouse scroll
         if (animator.GetCurrentAnimatorStateInfo(0).IsName("TargetTile_Turn")) {
             return;
@@ -48,11 +52,11 @@ public class TargetTile : MonoBehaviour {
         if (animator.GetCurrentAnimatorStateInfo(0).IsName("TargetTile_Turn_CounterClockwize")) {
             return;
         }
-        if (Input.mouseScrollDelta.y < -Mathf.Epsilon) {
+        if (Input.GetKeyDown(KeyCode.E)) {
             cell.RotateIconsClockwize();
             animator.Play("TargetTile_Turn");
         }
-        if (Input.mouseScrollDelta.y > Mathf.Epsilon) {
+        if (Input.GetKeyDown(KeyCode.Q)) {
             cell.RotateIconsCounterClockwize();
             animator.Play("TargetTile_Turn_CounterClockwize");
         }
