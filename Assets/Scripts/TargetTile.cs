@@ -4,15 +4,17 @@ using UnityEngine;
 
 public class TargetTile : MonoBehaviour {
     public Main main;
-
     private Cell cell;
 
     private bool didRenderIcons = false;
     private bool shouldDragAndDrop = true;
     private Animator animator;
 
+    private SfxController sfx;
+
     void Start() {
         animator = GetComponent<Animator>();
+        sfx = GetComponent<SfxController>();
     }
 
     void FinishInitOnceEver() {
@@ -41,10 +43,6 @@ public class TargetTile : MonoBehaviour {
     }
 
     void ProcessTurnInput() {
-        if (Input.GetKey(KeyCode.LeftControl)) {
-            // zooming camera
-            return;
-        }
         // turning tile on mouse scroll
         if (animator.GetCurrentAnimatorStateInfo(0).IsName("TargetTile_Turn")) {
             return;
@@ -55,10 +53,12 @@ public class TargetTile : MonoBehaviour {
         if (Input.GetKeyDown(KeyCode.E)) {
             cell.RotateIconsClockwize();
             animator.Play("TargetTile_Turn");
+            sfx.OnTurn(this);
         }
         if (Input.GetKeyDown(KeyCode.Q)) {
             cell.RotateIconsCounterClockwize();
             animator.Play("TargetTile_Turn_CounterClockwize");
+            sfx.OnTurn(this);
         }
     }
 
@@ -92,7 +92,10 @@ public class TargetTile : MonoBehaviour {
             pos = (Vector2Int)mouseCell,
             icons = cell.icons,
         };
-        main.TryPlaceCell(droppedToCell, this);
+        bool didPlace = main.TryPlaceCell(droppedToCell, this);
+        if (didPlace) {
+            sfx.OnPlace(this);
+        }
         // start dragging again
         shouldDragAndDrop = true;
         // ProceedToNextTargetTile();
