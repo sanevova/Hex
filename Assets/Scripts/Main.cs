@@ -12,6 +12,9 @@ public class Main : MonoBehaviour {
 
     public Tilemap _map { get; private set; }
     public Sprite[] possibleIcons;
+    public Cell _cell;
+
+    private List<Cell> _freeCells;
 
     private static Main _instance = null;
 
@@ -22,14 +25,12 @@ public class Main : MonoBehaviour {
     void Awake() {
         _instance = this;
         _map = GetComponent<Tilemap>();
-        possibleIcons = Resources.LoadAll<Sprite>("Sprites/Icons");
+        possibleIcons = Resources.LoadAll<Sprite>("Sprites/Icons").Take(12).ToArray();
     }
 
     void Start() {
         GeneratePuzzle();
     }
-
-    public Cell _cell;
 
     void Update() {
         var mousePosWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -42,16 +43,16 @@ public class Main : MonoBehaviour {
     }
 
     void GeneratePuzzle() {
-        GeneratePuzzleForNumberOfLayers(3);
+        GeneratePuzzleForNumberOfLayers(2);
     }
 
-    void GeneratePuzzleForNumberOfLayers(int n) {
+    void GeneratePuzzleForNumberOfLayers(int nLayers) {
         HashSet<Cell> cells = new(new Cell.CellEqualityComparer()) {
             Cell.CreateRandomCell(Vector2Int.zero)
         };
         List<Cell> outerLayer = new() { cells.First() };
         _cell = cells.First();
-        for (int layer = 1; layer < n; ++layer) {
+        for (int layer = 1; layer < nLayers; ++layer) {
             List<Cell> nextOuterLayer = new();
             // create next outer layer from the previous one
             foreach (Cell outerCell in outerLayer) {
@@ -85,8 +86,21 @@ public class Main : MonoBehaviour {
 
         Debug.Log("Generated Puzzle with cells: " + cells.Count);
         foreach (var cell in cells) {
-            RenderCell(cell);
+            // RenderCell(cell);
         }
+        _freeCells = cells.ToList();
+    }
+
+    public Cell GetNextFreeCell() {
+        if (!_freeCells.Any()) {
+            return Cell.CreateRandomCell();
+        }
+        var takeCellIndex = Random.Range(0, _freeCells.Count);
+        var cell = _freeCells[takeCellIndex];
+        _freeCells[takeCellIndex] = _freeCells[^1];
+        _freeCells.RemoveAt(_freeCells.Count - 1);
+        cell.pos = Vector2Int.zero;
+        return cell;
     }
 
     public void DestroyCellAt(Vector2Int pos) {
@@ -94,6 +108,7 @@ public class Main : MonoBehaviour {
         if (tile == null) {
             return;
         }
+        _freeCells.Add(tile.cell);
         tile.DeleteAllIcons();
         _map.SetTile((Vector3Int)pos, noTileStub);
     }

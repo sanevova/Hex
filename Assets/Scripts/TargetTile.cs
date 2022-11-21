@@ -23,7 +23,7 @@ public class TargetTile : MonoBehaviour {
         }
         // render icons once
         didRenderIcons = true;
-        cell = Cell.CreateRandomCell();
+        cell = main.GetNextFreeCell();
         main.RenderIconsForTarget(cell, gameObject);
     }
 
@@ -107,8 +107,10 @@ public class TargetTile : MonoBehaviour {
         for (int i = 0; i < transform.childCount; i++) {
             Destroy(transform.GetChild(i).gameObject);
         }
-        // create new random target
-        cell = Cell.CreateRandomCell();
+
+        // // create new random target
+        // cell = Cell.CreateRandomCell();
+        cell = main.GetNextFreeCell();
         // render new icons
         main.RenderIconsForTarget(cell, gameObject);
     }
