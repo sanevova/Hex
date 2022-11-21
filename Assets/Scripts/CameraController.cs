@@ -9,15 +9,20 @@ public class CameraController : MonoBehaviour {
     private Vector3 gripStartMousePosition;
     private bool shouldGripCamera = false;
     private Vector3 cameraMovementOffset = Vector3.zero;
-    private float finalCameraSize;
+    private float _finalCameraSize;
     private const float MIN_CAMERA_SIZE = 1;
     private const float MAX_CAMERA_SIZE = 7;
     private const float ZOOM_INTERPOLATION_STEP = 0.007f;
     private Camera cam;
 
+
+    private float _zoomStartSize;
+    private float _zoomStartTime = -100000f;
+    [SerializeField] private float _zoomDuration;
+
     void Start() {
         cam = GetComponent<Camera>();
-        finalCameraSize = cam.orthographicSize;
+        _finalCameraSize = cam.orthographicSize;
     }
 
     private void LateUpdate() {
@@ -25,9 +30,6 @@ public class CameraController : MonoBehaviour {
         Vector3 finalPosition = transform.position + cameraMovementOffset;
         Vector3 lerpPosition = Vector3.Lerp(transform.position, finalPosition, speed);
         transform.position = lerpPosition;
-
-        // smooth camera zoom
-        cam.orthographicSize = Mathf.Lerp(cam.orthographicSize, finalCameraSize, ZOOM_INTERPOLATION_STEP);
     }
 
     void Update() {
@@ -62,13 +64,24 @@ public class CameraController : MonoBehaviour {
     }
 
     void CameraZoom() {
-        var scrollOffset = Input.mouseScrollDelta.y;
-        if (Mathf.Approximately(scrollOffset, 0)) {
+        var elapsedTime = Time.time - _zoomStartTime;
+        if (elapsedTime < _zoomDuration) {
+            // have not finished last zoom step yet
+            var stepCompletion = elapsedTime / _zoomDuration;
+            cam.orthographicSize = Mathf.Lerp(_zoomStartSize, _finalCameraSize, stepCompletion);
             return;
         }
+        var scrollOffset = Input.mouseScrollDelta.y;
+
+        if (Mathf.Approximately(scrollOffset, 0)) {
+            // no zoom input
+            return;
+        }
+        _zoomStartSize = cam.orthographicSize;
+        _zoomStartTime = Time.time;
         var cameraZoomOffset = -scrollOffset * zoomSpeed;
-        finalCameraSize = Mathf.Clamp(
-            finalCameraSize + cameraZoomOffset,
+        _finalCameraSize = Mathf.Clamp(
+            _finalCameraSize + cameraZoomOffset,
             MIN_CAMERA_SIZE,
             MAX_CAMERA_SIZE);
     }
