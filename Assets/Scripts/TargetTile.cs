@@ -1,6 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 public class TargetTile : MonoBehaviour {
     public Main main;
@@ -11,6 +10,7 @@ public class TargetTile : MonoBehaviour {
     private Animator animator;
 
     private SfxController sfx;
+    private Tweener _rotationTweener;
 
     void Start() {
         animator = GetComponent<Animator>();
@@ -50,33 +50,34 @@ public class TargetTile : MonoBehaviour {
         if (animator.GetCurrentAnimatorStateInfo(0).IsName("TargetTile_Turn_CounterClockwize")) {
             return;
         }
+        if (_rotationTweener != null && _rotationTweener.IsActive()) {
+            // already rotating
+            return;
+        }
         if (Input.GetKeyDown(KeyCode.E)) {
             cell.RotateIconsClockwize();
-            animator.Play("TargetTile_Turn");
+            TurnParentClockwize();
             sfx.OnTurn(this);
         }
         if (Input.GetKeyDown(KeyCode.Q)) {
             cell.RotateIconsCounterClockwize();
-            animator.Play("TargetTile_Turn_CounterClockwize");
+            TurnParentCounterClockwize();
             sfx.OnTurn(this);
         }
     }
 
-    void OnTurnClockwizeAnimationEnd() {
+    void TurnParentClockwize() {
         TurnParentClockwizeOrCounterClockwize(true);
     }
 
-    void OnTurnCounterClockwizeAnimationEnd() {
+    void TurnParentCounterClockwize() {
         TurnParentClockwizeOrCounterClockwize(false);
     }
 
     void TurnParentClockwizeOrCounterClockwize(bool isClockwize) {
-        transform.parent.Rotate(
-            new Vector3(0, 0, isClockwize
-                ? -DirectionUtils.ONE_TURN_ANGLE
-                : DirectionUtils.ONE_TURN_ANGLE
-            )
-        );
+        var angleDiff = isClockwize ? -DirectionUtils.ONE_TURN_ANGLE : DirectionUtils.ONE_TURN_ANGLE;
+        var endAngle = transform.parent.rotation.eulerAngles + Vector3.forward * angleDiff;
+        _rotationTweener = transform.parent.DORotate(endAngle, 0.5f);
     }
 
     void TryPlaceTile() {
@@ -123,7 +124,7 @@ public class TargetTile : MonoBehaviour {
 
     void FollowMouse() {
         // follow mouse pointer
-        transform.position = Camera.main.ScreenToWorldPoint(new Vector3(
+        transform.parent.position = Camera.main.ScreenToWorldPoint(new Vector3(
             Input.mousePosition.x, Input.mousePosition.y, Camera.main.nearClipPlane));
     }
 }
