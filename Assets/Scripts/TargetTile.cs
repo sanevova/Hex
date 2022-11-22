@@ -103,7 +103,8 @@ public class TargetTile : MonoBehaviour {
     }
 
     public void ProceedToNextTargetTile() {
-        transform.parent.rotation = Quaternion.Euler(0, 0, 0);
+        _rotationTweener.Kill();
+        transform.parent.rotation = Quaternion.identity;
         // delete all icons (child objects)
         for (int i = 0; i < transform.childCount; i++) {
             Destroy(transform.GetChild(i).gameObject);
